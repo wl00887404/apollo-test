@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "apollo-server": "^2.13.1",
+    "dog-names": "^2.0.0",
+    "graphql": "^15.0.0"
+  }
+}
