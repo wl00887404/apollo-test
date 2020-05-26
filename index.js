@@ -1,10 +1,16 @@
 const { ApolloServer, gql } = require('apollo-server');
-const dogs = require('dog-names')
-  .all.slice(0, 5)
-  .map((name, index) => ({ id: index + 1, name, ownerId: 1 }));
+const names = require('dog-names').all;
+const dogs = names
+  .slice(0, 5)
+  .map((name, index) => ({ id: index + 1, name, ownerId: index % 2 }));
+const owners = names
+  .slice(5, 7)
+  .map((name, index) => ({ id: index + 1, name }));
+
 let autoIncrement = 5;
 
 console.log(dogs);
+console.log(owners);
 
 const typeDefs = gql`
   type Query {
@@ -30,6 +36,7 @@ const typeDefs = gql`
   type Owner {
     id: ID
     name: String
+    dogs: [Dog]
   }
 `;
 
@@ -39,7 +46,7 @@ const resolvers = {
     dogs: () => dogs,
     dog: (_, args, context) => {
       const { name } = args;
-      
+
       return dogs.find(dog => name === dog.name);
     },
   },
@@ -63,7 +70,28 @@ const resolvers = {
 
       const { ownerId } = parent;
 
-      return { id: ownerId, name: 'wl00887404' };
+      return owners.find(owner => owner.id == ownerId);
+    },
+  },
+  Owner: {
+    dogs: parent => {
+      /**
+       * {
+       *   dog(name: "Max") {
+       *     id
+       *     name
+       *     owner {
+       *       dogs {
+       *         name
+       *       }
+       *     }
+       * }
+       */
+      console.log(parent);
+
+      const { id } = parent;
+
+      return dogs.filter(dog => dog.ownerId === id);
     },
   },
 };
